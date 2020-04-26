@@ -237,6 +237,7 @@ def run_keras(X_train, X_test, y_train, y_test, plot_data=None, fe=False, outnam
                                                         random_state=rstate)
     X_train_fx, vect, fns, ms, scaler = features_keras(X_train, train=True)
     model = logreg_keras(X_train_fx.shape[1], fe=fe)
+    model.summary()
     model.fit(X_train_fx, y_train, epochs=10, batch_size=1, verbose=False)
     X_test_fx, *_ = features_keras(X_test, ms, vect, scaler, train=False)
     y_pred = model.predict_classes(X_test_fx)
