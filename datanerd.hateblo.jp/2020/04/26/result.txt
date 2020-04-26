@@ -1,0 +1,49 @@
+[sklearn]
+              precision    recall  f1-score   support
+
+           0       0.86      0.94      0.90       139
+           1       0.88      0.73      0.80        83
+
+    accuracy                           0.86       222
+   macro avg       0.87      0.84      0.85       222
+weighted avg       0.87      0.86      0.86       222
+
+SEX_0 Age_s: -1.1715824533971675
+BOW_mrs: 0.8891344760884135
+Pclass_2 SEX_1: 0.6353334118867877
+Pclass_2 SEX_1_m: 0.6353334118867877
+Pclass_3^2_s: -0.63239582414515
+SSA_0 SEX_1_m: 0.5695072613654194
+SSA_0 SEX_1: 0.5695072613654125
+BOW_mr_s: -0.496534282885925
+Age Fare_s: 0.4362429359642796
+Pclass_3 SEX_0_s: 0.43532611813271355
+Pclass_1 SEX_1_s: 0.3496457134867564
+PCA_0 Age_s: 0.26338545663598656
+PCA_0 SEX_1_s: 0.2296884023693112
+SEX_0 Fare_s: -0.1737349226553952
+SSA_0 SEX_0: 0.11150291176097532
+PCA_0 SEX_0_s: -0.08944642102834445
+SEX_1 Age: -0.05423418822973605
+Pclass_1 Age: 0.029806472554363275
+
+[keras(simple)]
+              precision    recall  f1-score   support
+
+           0       0.88      0.84      0.86       139
+           1       0.75      0.81      0.78        83
+
+    accuracy                           0.83       222
+   macro avg       0.82      0.82      0.82       222
+weighted avg       0.83      0.83      0.83       222
+
+[keras(2 layers)]
+              precision    recall  f1-score   support
+
+           0       0.90      0.93      0.91       139
+           1       0.87      0.82      0.84        83
+
+    accuracy                           0.89       222
+   macro avg       0.88      0.87      0.88       222
+weighted avg       0.89      0.89      0.89       222
+
