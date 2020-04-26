@@ -19,6 +19,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import roc_auc_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.feature_selection import SelectFromModel
+from plot_tool import plot, compress
 
 rstate = 14
 
@@ -200,10 +201,7 @@ def logreg_keras(input_dim, fe=True):
     return model
 
 
-def run_sklearn(df):
-    X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, 1:],
-                                                        df.iloc[:, 0],
-                                                        random_state=rstate)
+def run_sklearn(X_train, X_test, y_train, y_test, plot_data=None, outname="test"):
     X_train_fx, ms, vect, s_std, s_m, sfms, fns = features(X_train,
                                                            y_train,
                                                            ms=None,
@@ -219,6 +217,9 @@ def run_sklearn(df):
                              sfms,
                              train=False)
     y_pred = model.predict(X_test_fx)
+    if plot_data is None:
+        raise Exception("no plot data")
+    plot(plot_data, y_test, y_pred, outname)
 
     print(classification_report(y_test, y_pred))
     cs = sorted([(c, fn) for c, fn in zip(model.coef_[0], fns)],
@@ -230,7 +231,7 @@ def run_sklearn(df):
     print()
 
 
-def run_keras(df, fe=False):
+def run_keras(X_train, X_test, y_train, y_test, plot_data=None, fe=False, outname="test"):
     X_train, X_test, y_train, y_test = train_test_split(df.iloc[:, 1:],
                                                         df.iloc[:, 0],
                                                         random_state=rstate)
@@ -239,16 +240,25 @@ def run_keras(df, fe=False):
     model.fit(X_train_fx, y_train, epochs=10, batch_size=1, verbose=False)
     X_test_fx, *_ = features_keras(X_test, ms, vect, scaler, train=False)
     y_pred = model.predict_classes(X_test_fx)
+    if plot_data is None:
+        plot_data = compress(X_test_fx)
+    plot(plot_data, y_test, y_pred, outname)
     print(classification_report(y_test, y_pred))
+    return plot_data
 
 
 if __name__ == "__main__":
     df = pd.read_csv("titanic.csv")
-    print("[sklearn]")
-    run_sklearn(df)
+    data = train_test_split(df.iloc[:, 1:],
+                            df.iloc[:, 0],
+                            random_state=rstate)
 
     print("[keras(simple)]")
-    run_keras(df)
+    plot_data = run_keras(*data, fe=False, outname="keras_simple")
+
+    print("[sklearn]")
+    run_sklearn(*data, plot_data, outname="sklearn")
+
 
     print("[keras(2 layers)]")
-    run_keras(df, fe=True)
+    run_keras(*data, plot_data, fe=True, outname="keras_2layers")
