@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report
 
-mln = 4
+mln = 6
 
 rstate = 6
 os.environ['PYTHONHASHSEED'] = '0'
@@ -63,12 +63,19 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, random_state=rstate)
-    cv_result = cross_val_score(clf, X_train, y_train, cv=10, scoring="roc_auc")
+    cv_auc = cross_val_score(clf, X_train, y_train, cv=10, scoring="roc_auc")
+    cv_acc = cross_val_score(clf, X_train, y_train, cv=10, scoring="accuracy")
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     print(prefixs[0])
-    print(cv_result)
-    print("cv_mean:", np.mean(cv_result), ", cv_std:", np.std(cv_result))
+    print("[cv_auc]")
+    print(cv_auc)
+    print("mean:", np.mean(cv_auc), ", std:", np.std(cv_auc))
+    print()
+    print("[cv_acc]")
+    print(cv_acc)
+    print("mean:", np.mean(cv_acc), ", std:", np.std(cv_acc))
+    print()
     print(classification_report(y_test, y_pred))
     print()
 
