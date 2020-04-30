@@ -11,10 +11,6 @@ node [shape=box, style="filled", color="black"] ;
 3 -> 6 ;
 4 [label="entropy = 0.646\nsamples = 400\nvalue = [334, 66]", fillcolor="#ea9a60"] ;
 1 -> 4 ;
-2 [label="Siblings/Spouses Aboard <= 2.5\nentropy = 0.867\nsamples = 239\nvalue = [69, 170]", fillcolor="#89c5f0"] ;
+2 [label="entropy = 0.867\nsamples = 239\nvalue = [69, 170]", fillcolor="#89c5f0"] ;
 0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
-7 [label="entropy = 0.822\nsamples = 222\nvalue = [57, 165]", fillcolor="#7dbfee"] ;
-2 -> 7 ;
-8 [label="entropy = 0.874\nsamples = 17\nvalue = [12, 5]", fillcolor="#f0b58b"] ;
-2 -> 8 ;
 }

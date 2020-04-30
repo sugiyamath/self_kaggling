@@ -9,19 +9,12 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report
 
-mln = 5
+mln = 4
 
 rstate = 6
 os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(1)
 rn.seed(1)
-
-
-df = pd.read_csv("./titanic.csv")
-del (df["Name"])
-df["Sex"] = [0 if x == "male" else 1 for x in df["Sex"]]
-X, y = df.iloc[:, 1:], df.iloc[:, 0]
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=rstate)
 
 
 class MyEnsemble(BaseEstimator):
@@ -51,7 +44,6 @@ class MyEnsemble(BaseEstimator):
         y_pred = np.mean(preds, axis=0)
         return y_pred
 
-
     def get_params(self, deep=True):
         return {"clss": self._clss}
 
@@ -59,7 +51,7 @@ class MyEnsemble(BaseEstimator):
         self._clss = params["clss"]
 
 
-def _finalize(clf, y_pred, prefix, cls=X.columns, ensemble=False, rf=False):
+def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
     if ensemble:
         prefixs = prefix
         clfs = clf._clfs
@@ -69,7 +61,11 @@ def _finalize(clf, y_pred, prefix, cls=X.columns, ensemble=False, rf=False):
         clfs = [clf]
         clss = [cls]
 
-    cv_result = cross_val_score(clf, X, y, cv=10, scoring="roc_auc")
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, random_state=rstate)
+    cv_result = cross_val_score(clf, X_train, y_train, cv=10, scoring="roc_auc")
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
     print(prefixs[0])
     print(cv_result)
     print("cv_mean:", np.mean(cv_result), ", cv_std:", np.std(cv_result))
@@ -87,38 +83,56 @@ def _finalize(clf, y_pred, prefix, cls=X.columns, ensemble=False, rf=False):
                          shell=True)
 
 
-def run_model1():
+def run_model1(X, y):
+    cls = X.columns.tolist()
     clf = DecisionTreeClassifier(criterion="entropy",
-                                 random_state=rstate).fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    _finalize(clf, y_pred, "model1")
+                                 random_state=rstate)
+    _execute(X, y, clf, prefix="model1", cls=cls)
 
 
-def run_model2():
+def run_model2(X, y):
+    cls = X.columns.tolist()
     clf = DecisionTreeClassifier(criterion="entropy",
                                  max_leaf_nodes=mln,
-                                 random_state=rstate).fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    _finalize(clf, y_pred, "model2")
+                                 random_state=rstate)
+    _execute(X, y, clf, prefix="model2", cls=cls)
 
 
-def run_model3():
-    clf = MyEnsemble([X.columns, X.columns]).fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    _finalize(clf, y_pred, ["model3", "model3_B"], ensemble=True)
+def run_model3(X, y):
+    cls = X.columns.tolist()
+    clf = MyEnsemble([cls, cls])
+    _execute(X,
+             y,
+             clf,
+             prefix=["model3", "model3_B"],
+             cls=cls,
+             ensemble=True)
 
 
-def run_model4():
-    cls = X_train.columns.tolist()
+def run_model4(X, y):
+    cls = X.columns.tolist()
     cls1 = ['Pclass', 'Sex', 'Age']
     cls2 = ['Age', 'Sex', 'Siblings/Spouses Aboard']
-    clf = MyEnsemble([cls1, cls2]).fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    _finalize(clf, y_pred, ["model4", "model4_B"], ensemble=True)
+    clf = MyEnsemble([cls1, cls2])
+    _execute(X,
+             y,
+             clf,
+             prefix=["model4", "model4_B"],
+             cls=cls,
+             ensemble=True)
+
+
+def _prepare_data(fname="./titanic.csv"):
+    df = pd.read_csv(fname)
+    del (df["Name"])
+    df["Sex"] = [0 if x == "male" else 1 for x in df["Sex"]]
+    return df.iloc[:, 1:], df.iloc[:, 0]
+
 
 
 if __name__ == "__main__":
-    run_model1()
-    run_model2()
-    run_model3()
-    run_model4()
+    data = _prepare_data()
+    run_model1(*data)
+    run_model2(*data)
+    run_model3(*data)
+    run_model4(*data)
