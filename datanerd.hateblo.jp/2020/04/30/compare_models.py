@@ -107,17 +107,6 @@ def run_model2(X, y):
 
 def run_model3(X, y):
     cls = X.columns.tolist()
-    clf = MyEnsemble([cls, cls])
-    _execute(X,
-             y,
-             clf,
-             prefix=["model3", "model3_B"],
-             cls=cls,
-             ensemble=True)
-
-
-def run_model4(X, y):
-    cls = X.columns.tolist()
     cls1 = ['Pclass', 'Sex', 'Age']
     cls2 = ['Age', 'Sex', 'Siblings/Spouses Aboard']
     clf = MyEnsemble([cls1, cls2])
@@ -142,4 +131,3 @@ if __name__ == "__main__":
     run_model1(*data)
     run_model2(*data)
     run_model3(*data)
-    run_model4(*data)
