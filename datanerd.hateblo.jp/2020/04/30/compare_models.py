@@ -9,10 +9,13 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report
 
+mln = 5
+
 rstate = 6
 os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(1)
 rn.seed(1)
+
 
 df = pd.read_csv("./titanic.csv")
 del (df["Name"])
@@ -30,7 +33,7 @@ class MyEnsemble(BaseEstimator):
         for cls in self._clss:
             self._clfs.append(
                 DecisionTreeClassifier(criterion="entropy",
-                                       max_leaf_nodes=8,
+                                       max_leaf_nodes=mln,
                                        random_state=rstate).fit(X[cls], y))
         return self
 
@@ -40,6 +43,14 @@ class MyEnsemble(BaseEstimator):
             preds.append(clf.predict_proba(X[cls])[:, 1])
         y_pred = np.mean(preds, axis=0) > 0.5
         return y_pred
+
+    def predict_proba(self, X):
+        preds = []
+        for clf, cls in zip(self._clfs, self._clss):
+            preds.append(clf.predict_proba(X[cls]))
+        y_pred = np.mean(preds, axis=0)
+        return y_pred
+
 
     def get_params(self, deep=True):
         return {"clss": self._clss}
@@ -58,8 +69,10 @@ def _finalize(clf, y_pred, prefix, cls=X.columns, ensemble=False, rf=False):
         clfs = [clf]
         clss = [cls]
 
-    print(prefix[0])
-    print(cross_val_score(clf, X, y, cv=10, scoring="accuracy"))
+    cv_result = cross_val_score(clf, X, y, cv=10, scoring="roc_auc")
+    print(prefixs[0])
+    print(cv_result)
+    print("cv_mean:", np.mean(cv_result), ", cv_std:", np.std(cv_result))
     print(classification_report(y_test, y_pred))
     print()
 
@@ -83,7 +96,7 @@ def run_model1():
 
 def run_model2():
     clf = DecisionTreeClassifier(criterion="entropy",
-                                 max_leaf_nodes=8,
+                                 max_leaf_nodes=mln,
                                  random_state=rstate).fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     _finalize(clf, y_pred, "model2")
