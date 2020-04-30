@@ -5,11 +5,12 @@ import numpy as np
 import random as rn
 from subprocess import check_output
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.linear_model import LogisticRegression
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report
 
-mln = 6
+mln = 7
 
 rstate = 6
 os.environ['PYTHONHASHSEED'] = '0'
@@ -21,21 +22,27 @@ class MyEnsemble(BaseEstimator):
     def __init__(self, clss):
         self._clss = clss
         self._clfs = []
+        self._lr = None
 
     def fit(self, X, y):
+        preds = []
         for cls in self._clss:
-            self._clfs.append(
-                DecisionTreeClassifier(criterion="entropy",
-                                       max_leaf_nodes=mln,
-                                       random_state=rstate).fit(X[cls], y))
+            clf = DecisionTreeClassifier(criterion="entropy",
+                                         max_leaf_nodes=mln,
+                                         random_state=rstate).fit(X[cls], y)
+            preds.append(clf.predict_proba(X[cls])[:, 1:2])
+            self._clfs.append(clf)
+        feats = np.hstack(tuple(preds))
+        self._lr = LogisticRegression().fit(feats, y)
         return self
 
     def predict(self, X):
         preds = []
         for clf, cls in zip(self._clfs, self._clss):
-            preds.append(clf.predict_proba(X[cls])[:, 1])
-        y_pred = np.mean(preds, axis=0) > 0.5
-        return y_pred
+            preds.append(clf.predict_proba(X[cls])[:, 1:2])
+        feats = np.hstack(tuple(preds))
+        return self._lr.predict(feats)
+
 
     def predict_proba(self, X):
         preds = []
@@ -100,20 +107,21 @@ def run_model1(X, y):
 def run_model2(X, y):
     cls = X.columns.tolist()
     clf = DecisionTreeClassifier(criterion="entropy",
-                                 max_leaf_nodes=mln,
+                                 max_leaf_nodes=mln*3,
                                  random_state=rstate)
     _execute(X, y, clf, prefix="model2", cls=cls)
 
 
 def run_model3(X, y):
     cls = X.columns.tolist()
-    cls1 = ['Pclass', 'Sex', 'Age']
+    cls1 = ['Age', 'Sex', 'Pclass']
     cls2 = ['Age', 'Sex', 'Siblings/Spouses Aboard']
-    clf = MyEnsemble([cls1, cls2])
+    cls3 = ['Age', 'Sex', 'Fare']
+    clf = MyEnsemble([cls1, cls2, cls3])
     _execute(X,
              y,
              clf,
-             prefix=["model4", "model4_B"],
+             prefix=["model3", "model3_B", "model3_C"],
              cls=cls,
              ensemble=True)
 
