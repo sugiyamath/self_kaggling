@@ -107,6 +107,14 @@ def _execute(X, y, clf, prefix, cls, ensemble=False):
     print('-'*20)
     print()
 
+def run_bad_model(X, y):
+    X["rand1"] = [rn.randint(0, 10) for _ in range(X.shape[0])]
+    X["rand2"] = [rn.randint(10, 20) for _ in range(X.shape[0])]
+    X["rand3"] = [rn.randint(20, 30) for _ in range(X.shape[0])]
+    cls = X.columns.tolist()
+    clf = DecisionTreeClassifier(criterion="entropy", random_state=rstate)
+    _execute(X, y, clf, prefix="bad_model", cls=cls)
+
 
 def run_model1(X, y):
     cls = X.columns.tolist()
@@ -148,6 +156,7 @@ def _prepare_data(fname="./titanic.csv"):
 
 if __name__ == "__main__":
     data = _prepare_data()
+    run_bad_model(*data)
     run_model1(*data)
     run_model2(*data)
     run_model3(*data)
