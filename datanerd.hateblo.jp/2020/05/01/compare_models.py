@@ -144,6 +144,14 @@ def run_bad_model(X, y):
     _execute(X, y, clf, prefix="bad_model", cls=cls)
 
 
+def run_bad_model2(X, y):
+    cls = X.columns.tolist()
+    clf = DecisionTreeClassifier(criterion="entropy",
+                                 max_leaf_nodes=mln * 3,
+                                 random_state=rstate)
+    _execute(X, y, clf, prefix="bad_model2", cls=cls)
+
+
 def _prepare_data(fname="./titanic.csv"):
     df = pd.read_csv(fname)
     del (df["Name"])
@@ -157,3 +165,5 @@ if __name__ == "__main__":
     run_model2(*data)
     run_model3(*data)
     run_bad_model(*data)
+    run_bad_model2(*data)
+    
