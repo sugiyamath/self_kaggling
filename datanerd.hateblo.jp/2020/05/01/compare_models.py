@@ -46,9 +46,9 @@ class MyEnsemble(BaseEstimator):
     def predict_proba(self, X):
         preds = []
         for clf, cls in zip(self._clfs, self._clss):
-            preds.append(clf.predict_proba(X[cls]))
-        y_pred = np.mean(preds, axis=0)
-        return y_pred
+            preds.append(clf.predict_proba(X[cls])[:, 1:2])
+        feats = np.hstack(tuple(preds))
+        return self._lr.predict_proba(feats)
 
     def get_params(self, deep=True):
         return {"clss": self._clss}
