@@ -26,6 +26,8 @@ class MyEnsemble(BaseEstimator):
 
     def fit(self, X, y):
         preds = []
+        self._clfs = []
+        self._lr = None
         for cls in self._clss:
             clf = DecisionTreeClassifier(criterion="entropy",
                                          max_leaf_nodes=mln,
