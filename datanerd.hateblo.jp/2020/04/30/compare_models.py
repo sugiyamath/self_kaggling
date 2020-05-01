@@ -57,7 +57,7 @@ class MyEnsemble(BaseEstimator):
         self._clss = params["clss"]
 
 
-def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
+def _execute(X, y, clf, prefix, cls, ensemble=False):
     alps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     if ensemble:
         prefixs = [prefix+"_{}".format(x) for x in alps]
@@ -75,7 +75,7 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
     cv_acc = cross_val_score(clf, X_train, y_train, cv=10, scoring="accuracy")
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
-    print(prefix)
+    print("[["+prefix+"]]")
     print("[cv_auc]")
     print(cv_auc)
     print("mean:", np.mean(cv_auc), ", std:", np.std(cv_auc))
@@ -86,12 +86,15 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
     print()
     print(classification_report(y_test, y_pred))
     if ensemble:
+        print("[model coefs]")
         for p, c in zip(prefixs, clf._lr.coef_[0]):
             print(p, c)
     print()
 
     for cls, clf, prefix in zip(clss, clfs, prefixs):
-        if not rf:
+        print("["+prefix+" feature importances]")
+        for n, fi in zip(cls, clf.feature_importances_):
+            print(n, fi)
             export_graphviz(clf,
                             "./tree/{}.dot".format(prefix),
                             feature_names=cls,
@@ -99,6 +102,9 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
             check_output("dot -Tpng ./tree/{}.dot -o ./tree/{}.png".format(
                 prefix, prefix),
                          shell=True)
+    print()
+    print()
+    print()
 
 
 def run_model1(X, y):
