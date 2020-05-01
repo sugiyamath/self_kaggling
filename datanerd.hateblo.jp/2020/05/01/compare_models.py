@@ -60,7 +60,7 @@ class MyEnsemble(BaseEstimator):
 def _execute(X, y, clf, prefix, cls, ensemble=False):
     alps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     if ensemble:
-        prefixs = [prefix+"_{}".format(x) for x in alps]
+        prefixs = [prefix + "_{}".format(x) for x in alps]
         clfs = clf._clfs
         clss = clf._clss
     else:
@@ -75,7 +75,7 @@ def _execute(X, y, clf, prefix, cls, ensemble=False):
     cv_acc = cross_val_score(clf, X_train, y_train, cv=10, scoring="accuracy")
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
-    print("[["+prefix+"]]")
+    print("[[" + prefix + "]]")
     print("[cv_auc]")
     print(cv_auc)
     print("mean:", np.mean(cv_auc), ", std:", np.std(cv_auc))
@@ -92,7 +92,7 @@ def _execute(X, y, clf, prefix, cls, ensemble=False):
     print()
 
     for cls, clf, prefix in zip(clss, clfs, prefixs):
-        print("["+prefix+" feature importances]")
+        print("[" + prefix + " feature importances]")
         for n, fi in zip(cls, clf.feature_importances_):
             print(n, fi)
             export_graphviz(clf,
@@ -104,16 +104,8 @@ def _execute(X, y, clf, prefix, cls, ensemble=False):
                          shell=True)
         print()
     print()
-    print('-'*20)
+    print('-' * 20)
     print()
-
-def run_bad_model(X, y):
-    X["rand1"] = [rn.randint(0, 10) for _ in range(X.shape[0])]
-    X["rand2"] = [rn.randint(10, 20) for _ in range(X.shape[0])]
-    X["rand3"] = [rn.randint(20, 30) for _ in range(X.shape[0])]
-    cls = X.columns.tolist()
-    clf = DecisionTreeClassifier(criterion="entropy", random_state=rstate)
-    _execute(X, y, clf, prefix="bad_model", cls=cls)
 
 
 def run_model1(X, y):
@@ -134,17 +126,22 @@ def run_model3(X, y):
     cls = X.columns.tolist()
     clss = []
     clss.append(['Age', 'Sex', 'Pclass', 'Fare'])
-    clss.append(['Age', 'Sex', 'Siblings/Spouses Aboard', 'Parents/Children Aboard'])
+    clss.append(
+        ['Age', 'Sex', 'Siblings/Spouses Aboard', 'Parents/Children Aboard'])
     #clss.append(['Age', 'Sex', 'Fare'])
     clss.append(['Age', 'Sex'])
     #clss.append(['Age', 'Sex', 'Parents/Children Aboard'])
     clf = MyEnsemble(clss)
-    _execute(X,
-             y,
-             clf,
-             prefix="model3",
-             cls=cls,
-             ensemble=True)
+    _execute(X, y, clf, prefix="model3", cls=cls, ensemble=True)
+
+
+def run_bad_model(X, y):
+    X["rand1"] = [rn.randint(0, 10) for _ in range(X.shape[0])]
+    X["rand2"] = [rn.randint(10, 20) for _ in range(X.shape[0])]
+    X["rand3"] = [rn.randint(20, 30) for _ in range(X.shape[0])]
+    cls = X.columns.tolist()
+    clf = DecisionTreeClassifier(criterion="entropy", random_state=rstate)
+    _execute(X, y, clf, prefix="bad_model", cls=cls)
 
 
 def _prepare_data(fname="./titanic.csv"):
@@ -156,7 +153,7 @@ def _prepare_data(fname="./titanic.csv"):
 
 if __name__ == "__main__":
     data = _prepare_data()
-    run_bad_model(*data)
     run_model1(*data)
     run_model2(*data)
     run_model3(*data)
+    run_bad_model(*data)
