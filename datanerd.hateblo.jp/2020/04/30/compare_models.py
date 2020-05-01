@@ -10,9 +10,9 @@ from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report
 
-mln = 7
+mln = 8
 
-rstate = 6
+rstate = 0
 os.environ['PYTHONHASHSEED'] = '0'
 np.random.seed(1)
 rn.seed(1)
@@ -43,7 +43,6 @@ class MyEnsemble(BaseEstimator):
         feats = np.hstack(tuple(preds))
         return self._lr.predict(feats)
 
-
     def predict_proba(self, X):
         preds = []
         for clf, cls in zip(self._clfs, self._clss):
@@ -59,8 +58,9 @@ class MyEnsemble(BaseEstimator):
 
 
 def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
+    alps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     if ensemble:
-        prefixs = prefix
+        prefixs = [prefix+"_{}".format(x) for x in alps]
         clfs = clf._clfs
         clss = clf._clss
     else:
@@ -68,13 +68,14 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
         clfs = [clf]
         clss = [cls]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, random_state=rstate)
+    X_train, X_test, y_train, y_test = train_test_split(X,
+                                                        y,
+                                                        random_state=rstate)
     cv_auc = cross_val_score(clf, X_train, y_train, cv=10, scoring="roc_auc")
     cv_acc = cross_val_score(clf, X_train, y_train, cv=10, scoring="accuracy")
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
-    print(prefixs[0])
+    print(prefix)
     print("[cv_auc]")
     print(cv_auc)
     print("mean:", np.mean(cv_auc), ", std:", np.std(cv_auc))
@@ -99,29 +100,31 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
 
 def run_model1(X, y):
     cls = X.columns.tolist()
-    clf = DecisionTreeClassifier(criterion="entropy",
-                                 random_state=rstate)
+    clf = DecisionTreeClassifier(criterion="entropy", random_state=rstate)
     _execute(X, y, clf, prefix="model1", cls=cls)
 
 
 def run_model2(X, y):
     cls = X.columns.tolist()
     clf = DecisionTreeClassifier(criterion="entropy",
-                                 max_leaf_nodes=mln*3,
+                                 max_leaf_nodes=mln * 3,
                                  random_state=rstate)
     _execute(X, y, clf, prefix="model2", cls=cls)
 
 
 def run_model3(X, y):
     cls = X.columns.tolist()
-    cls1 = ['Age', 'Sex', 'Pclass']
-    cls2 = ['Age', 'Sex', 'Siblings/Spouses Aboard']
-    cls3 = ['Age', 'Sex', 'Fare']
-    clf = MyEnsemble([cls1, cls2, cls3])
+    clss = []
+    clss.append(['Age', 'Sex', 'Pclass', 'Fare'])
+    clss.append(['Age', 'Sex', 'Siblings/Spouses Aboard', 'Parents/Children Aboard'])
+    #clss.append(['Age', 'Sex', 'Fare'])
+    clss.append(['Age', 'Sex'])
+    #clss.append(['Age', 'Sex', 'Parents/Children Aboard'])
+    clf = MyEnsemble(clss)
     _execute(X,
              y,
              clf,
-             prefix=["model3", "model3_B", "model3_C"],
+             prefix="model3",
              cls=cls,
              ensemble=True)
 
@@ -131,7 +134,6 @@ def _prepare_data(fname="./titanic.csv"):
     del (df["Name"])
     df["Sex"] = [0 if x == "male" else 1 for x in df["Sex"]]
     return df.iloc[:, 1:], df.iloc[:, 0]
-
 
 
 if __name__ == "__main__":
