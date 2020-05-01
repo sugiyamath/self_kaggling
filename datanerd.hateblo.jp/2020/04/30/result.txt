@@ -28,6 +28,7 @@ Parents/Children Aboard 0.02833159615292289
 Fare 0.3092833832950272
 
 
+--------------------
 
 [[model2]]
 [cv_auc]
@@ -59,6 +60,7 @@ Parents/Children Aboard 0.010753102530797195
 Fare 0.19040816433306623
 
 
+--------------------
 
 [[model3]]
 [cv_auc]
@@ -90,14 +92,17 @@ Age 0.08350722285844986
 Sex 0.5698858651740656
 Pclass 0.19288558112030862
 Fare 0.1537213308471759
+
 [model3_B feature importances]
 Age 0.16339026474952525
 Sex 0.6732678940730926
 Siblings/Spouses Aboard 0.1233882504764205
 Parents/Children Aboard 0.039953590700961855
+
 [model3_C feature importances]
 Age 0.24315183295092674
 Sex 0.7568481670490733
 
 
+--------------------
 

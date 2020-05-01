@@ -102,8 +102,9 @@ def _execute(X, y, clf, prefix, cls, ensemble=False):
             check_output("dot -Tpng ./tree/{}.dot -o ./tree/{}.png".format(
                 prefix, prefix),
                          shell=True)
+        print()
     print()
-    print()
+    print('-'*20)
     print()
 
 
