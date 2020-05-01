@@ -85,6 +85,9 @@ def _execute(X, y, clf, prefix, cls, ensemble=False, rf=False):
     print("mean:", np.mean(cv_acc), ", std:", np.std(cv_acc))
     print()
     print(classification_report(y_test, y_pred))
+    if ensemble:
+        for p, c in zip(prefixs, clf._lr.coef_[0]):
+            print(p, c)
     print()
 
     for cls, clf, prefix in zip(clss, clfs, prefixs):
