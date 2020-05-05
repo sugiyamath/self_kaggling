@@ -69,7 +69,7 @@ def simplify(nrate):
 def main():
     people = fetch_lfw_people(min_faces_per_person=20, resize=0.7)
     clabs = count_labels(people.target)
-    clusters = clustering(people.images, "euclidean", 0.9)
+    clusters = clustering(people.images, "euclidean", 0.8)
     cnt_cl = count_clusters(clusters, people.target)
     rate = calc_rate(cnt_cl, clabs)
     nrate = normalize_rate(rate, clabs, people.target_names)
