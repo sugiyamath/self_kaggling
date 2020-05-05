@@ -34,29 +34,29 @@ def count_clusters(clusters, target):
     return out
 
 
-def calc_rate(cnt_cl, clabs, target_names):
+def calc_rate(cnt_cl, clabs):
     out = cnt_cl[:]
     for c, tdict in enumerate(cnt_cl):
         maxval = max(tdict.items(), key=lambda x: x[1] / clabs[x[0]])
         sumval = sum(x[1] for x in tdict.items())
-        out[c] = (c, target_names[maxval[0]], maxval[1] / clabs[maxval[0]], maxval[1]/sumval)
+        out[c] = (c, maxval[0], maxval[1], sumval)
     return out
 
 
-def normalize_rate(rate):
+def normalize_rate(rate, clabs, target_names):
     out = {}
     tns = set()
-    for c, tn, r, p in rate:
+    for c, tid, mval, sval in rate:
+        tn = target_names[tid]
         if tn not in out:
-            out[tn] = [[], 0.0, []]
+            out[tn] = [[], 0.0, 0.0]
         out[tn][0].append(c)
-        out[tn][1] += r
-        out[tn][2].append(p)
-        if tn not in tns:
-            tns.add(tn)
-    for tn in tns:
-        tmp = out[tn][2]
-        out[tn][2] = sum(tmp)/len(tmp)
+        out[tn][1] += mval
+        out[tn][2] += sval
+        tns.add((tn, tid))
+    for tn, tid in tns:
+        out[tn][2] = out[tn][1]/out[tn][2]
+        out[tn][1] = out[tn][1]/clabs[tid]
     return out
 
 def simplify(nrate):
@@ -71,8 +71,8 @@ def main():
     clabs = count_labels(people.target)
     clusters = clustering(people.images, "euclidean", 0.9)
     cnt_cl = count_clusters(clusters, people.target)
-    rate = calc_rate(cnt_cl, clabs, people.target_names)
-    nrate = normalize_rate(rate)
+    rate = calc_rate(cnt_cl, clabs)
+    nrate = normalize_rate(rate, clabs, people.target_names)
     nrate = simplify(nrate)
     pprint.pprint(nrate)
 
